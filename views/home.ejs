@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrapper Home</title>
+    <style>
+        main{
+          
+            width: 100%;
+            justify-content: space-between;
+        }
+        form{
+            max-width:500px;
+            margin: auto;
+            margin-top: 50px;
+        }
+        form input{
+            width: 80%;
+            padding: 0.5em;
+            outline: none;
+            border-radius: 7px;
+            border: 1px solid #ccc;
+            display: block;
+            margin: 0.8em auto;
+        }
+        form h3{
+            text-align: center;
+        }
+        form button{
+            width: 50%;
+            display: block;
+            border: none;
+            margin: auto;
+            border-radius: 7px;
+            padding: 1em;
+        }
+        .scraped-data{
+            width: 100%;
+            margin-top: 25px
+        }
+        .scraped-data h3{
+            text-align: center;
+        }
+        .data-list{
+            list-style: none;
+            padding-left: 0;
+            padding-block-start: 0;
+            max-height: 50vh;
+            overflow-y: scroll;
+        }
+        .data-list li {
+            width: 90%;
+            margin: 0.9em auto;
+        }
+        .pagination{
+            display: flex;
+            justify-content: center;
+        }
+        .pagination button{
+            border: none;
+            margin: 0 0.8em;
+            padding:0.3em 0.5em;
+            cursor: pointer;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+  <main>
+        <form>
+            <h3>Add Scrapping Details</h3>
+            <input type="text" name="selector" class="selector" id="selector" placeholder="Selector" minlength="3" required>
+            <input type="url" name="link" id="" class="url" id="url" placeholder="Url" required>
+            <button type="submit">Scrape</button>
+        </form>
+    <div class="scraped-data">
+        <h3>All Scraped Data</h3>
+        <ul class="data-list">
+            
+        </ul>
+        <div class="pagination">
+            <button class="prev" onclick="changePage(-1)"><</button>
+            <button class="next"  onclick="changePage(1)">></button>
+        </div>
+    </div>
+  </main>
+</body>
+</html>
+
+<script >
+  let page = 1
+  const ITEMS_PER_PAGE = 5
+  const form = document.querySelector('form')
+  form.addEventListener('submit',(e)=>{
+      e.preventDefault()
+      const scraperDetails = {
+          url:e.target['link'].value,
+          selector:e.target['selector'].value
+      }
+      console.log(JSON.stringify(scraperDetails))
+      fetch('/api',{
+          method:"POST",
+          headers: {'Content-Type': 'application/json'},
+          body:JSON.stringify(scraperDetails)
+      })
+      .then(response => response.json())
+      .then(json => console.log(json))
+
+      getScrapedData()
+  })
+ window.addEventListener('load',()=>{getScrapedData()})
+
+  async function getScrapedData(page){
+     const list = document.querySelector('.data-list')
+     const response = await fetch('/api/')
+     const data = await response.json()
+     let last_page =page * ITEMS_PER_PAGE
+
+
+     list.innerHTML = ""
+     console.log(data)
+    data.forEach((d,i)=>{
+        list.innerHTML +=`
+        <li>
+            <h5><span>${i + 1}</span>${d.selector}</h5>
+          <p><small>${d.url}</small></p>
+          <p><small>'${d.body}'...</small></p>
+        </li>
+        `
+    })
+  }
+
+//   const changePage= async (increase)=>{
+//     const response = await fetch('/api/')
+//     const data = await response.json()
+    
+
+//     if(page > data.length % PER_PAGE * page ){
+
+//     }
+//     else{
+//         if(page < 1){
+//             page = 1
+//         }
+//         else{
+//             page += increase
+//         }
+//         getScrapedData()
+//     }
+//   }
+</script>
